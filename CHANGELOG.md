@@ -2,6 +2,11 @@
 
 本项目遵循语义化版本（pre-release 阶段为 `0.0.x`）。`@version` 单一来源在 `src/meta.js`。
 
+## [0.0.10] - 2026-10-06
+
+### 新增
+- **评论区显示 IP 属地**：新增开关 `showCmtLocation`（评论 → 📍），把评论数据里已有的 `reply_control.location`（"IP属地：xx"）补渲染到 B 站没有显示属地的页面上。合并自 mscststs 的「B站评论区开盒」（ISC），但弃用其「拦截脚本加载 → 拉源码改字符串 → eval」的实现，改走本项目现有的 `__data` 数据通道 + shadow DOM 注入（`src/cmtlocation.ts`），不再 eval、不再挂钩 `insertBefore`/`appendChild`；B 站自己已显示属地的位置不重复注入。旧版 bbComment 原型补丁与 vue-next 过渡架构的两路兼容未搬（已下线/非现行架构）。参考：https://greasyfork.org/zh-CN/scripts/448434-b%E7%AB%99%E8%AF%84%E8%AE%BA%E5%8C%BA%E5%BC%80%E7%9B%92
+
 ## [0.0.9] - 2026-10-06
 
 ### 新增

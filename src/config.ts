@@ -84,6 +84,7 @@ export interface AppConfig {
   hideCharging: boolean;
   boostFeedLoad: boolean;
   comment: CommentConfig;
+  showCmtLocation: boolean; // 评论区显示 IP 属地（B 站部分页面不展示时补全；走 __data 里已有的 reply_control.location）
   debug: boolean;
   blockedCount: number;
   uidNames: Record<string, string>;
@@ -154,6 +155,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     allowMe: true, // 白名单：自己发布/被 @ 的评论免过滤
     collapse: true, // 命中后折叠为一行灰条（点击展开），而非直接隐藏
   },
+  showCmtLocation: false, // 评论区显示 IP 属地（默认关：多数页面 B 站自己就显示，开启只为补全不显示的场景）
   debug: false,
   blockedCount: 0,
   uidNames: {}, // uid -> UP 名 缓存（仅用于面板按名称展示；拉黑仍用 uid）
