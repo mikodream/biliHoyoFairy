@@ -3,7 +3,7 @@
 // @name:zh-CN   B站(bilibili)推荐流净化·屏蔽拉黑去广告 — biliHoyoFairy 抗击黑潮
 // @name:en      biliHoyoFairy — bilibili Feed Cleaner, Blocker & Account Blacklist
 // @namespace    https://github.com/gendu-amd/biliHoyoFairy
-// @version      0.0.8
+// @version      0.0.9
 // @description  B站(bilibili/哔哩哔哩)推荐流净化与屏蔽脚本：屏蔽黑流量、引战视频、商业广告与不想看的 UP 主。支持按 标签/UP主/UID/关键词(可正则)/分区/时长/播放量/BV 精准过滤；覆盖首页/热门/排行榜/搜索/播放页/动态/评论区；白名单优先防误伤；右键一键屏蔽/拉黑(同步账号黑名单)；内置预置关键词库与规则订阅。
 // @description:en  Clean up & block the bilibili recommendation feed: hide clickbait, flame-bait, ads and unwanted UP owners. Filter by tag/UP/UID/keyword(regex)/category/duration/views/BV across home, popular, ranking, search, video, dynamic pages and comments; whitelist priority; one-click block synced to the account blacklist; preset keyword library and rule subscriptions.
 // @author       gendu-amd
@@ -163,6 +163,7 @@
   var CARD_MID_ATTRS = ["data-mid", "data-up-mid", "data-user-id"];
   var LIVE_CARD_SELECTOR = '.bili-live-card, [class*="live-card"]';
   var AD_CARD_SELECTOR = '.bili-video-card__info--ad,a[href*="cm.bilibili.com"],a[href*="//mall.bilibili.com"],a[href*="specialRecommendByOp"]';
+  var FLOOR_BADGE_CARD_SELECTOR = ".floor-single-card:has(.badge)";
   var HOTSEARCH_SELECTORS = [
     ".trending",
     ".search-panel .trending-list",
@@ -409,6 +410,8 @@
     hideAd: false,
     hideLiveCard: false,
     // 屏蔽信息流里的直播推荐卡（首页/动态里链向 live.bilibili.com 的卡）
+    hideFloorBadgeCard: false,
+    // 屏蔽首页带角标的整宽推广单卡（.floor-single-card:has(.badge)）；样式整体隐藏，见 stylehide.ts
     hideHotSearch: false,
     apiFilters: false,
     // 精确过滤总开关（关闭时完全不联网）
@@ -2258,19 +2261,25 @@
     }, 300);
   }
 
-  // src/hotsearch.ts
-  function applyHotSearchStyle() {
-    let st = document.getElementById("bfb-hotsearch-style");
-    if (CONFIG.hideHotSearch) {
+  // src/stylehide.ts
+  function toggleStyle(id, css, on) {
+    let st = document.getElementById(id);
+    if (on) {
       if (!st) {
         st = document.createElement("style");
-        st.id = "bfb-hotsearch-style";
+        st.id = id;
         document.head.appendChild(st);
       }
-      st.textContent = HOTSEARCH_SELECTORS.join(",") + "{display:none !important}";
+      st.textContent = css;
     } else if (st) {
       st.remove();
     }
+  }
+  function applyHotSearchStyle() {
+    toggleStyle("bfb-hotsearch-style", HOTSEARCH_SELECTORS.join(",") + "{display:none !important}", CONFIG.hideHotSearch);
+  }
+  function applyFloorBadgeStyle() {
+    toggleStyle("bfb-floorbadge-style", FLOOR_BADGE_CARD_SELECTOR + "{display:none !important}", CONFIG.hideFloorBadgeCard);
   }
 
   // src/api.ts
@@ -4189,11 +4198,13 @@
       <label>卡片类型过滤</label>
       <div class="switch"><input type="checkbox" id="bfb-ad"> 屏蔽广告 / 推广卡片</div>
       <div class="switch"><input type="checkbox" id="bfb-live"> 屏蔽信息流中的直播推荐卡</div>
+      <div class="switch"><input type="checkbox" id="bfb-floorbadge"> 屏蔽首页带角标的整宽推广单卡（番剧/课程等活动位）</div>
       <div class="switch"><input type="checkbox" id="bfb-hotsearch"> 屏蔽搜索框热搜词</div>
       <div class="hint">广告为自动识别，偶有误差，可在「屏蔽记录」核对。直播卡指信息流里指向直播间的推荐卡。</div>`;
       host.appendChild(ct);
       bindControl(ct, "bfb-ad", CONFIG, "hideAd", { after: rescanAfterRuleChange });
       bindControl(ct, "bfb-live", CONFIG, "hideLiveCard", { after: rescanAfterRuleChange });
+      bindControl(ct, "bfb-floorbadge", CONFIG, "hideFloorBadgeCard", { after: applyFloorBadgeStyle });
       bindControl(ct, "bfb-hotsearch", CONFIG, "hideHotSearch", { after: applyHotSearchStyle });
     }
   };
@@ -5626,6 +5637,7 @@ ${r.line}`, {
       }
       updateBadge();
       applyHotSearchStyle();
+      applyFloorBadgeStyle();
       harvestShadowRoots(document);
       scanAll();
       scanComments();

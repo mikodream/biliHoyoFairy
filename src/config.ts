@@ -78,6 +78,7 @@ export interface AppConfig {
   allow: AllowConfig;
   hideAd: boolean;
   hideLiveCard: boolean;
+  hideFloorBadgeCard: boolean; // 首页信息流带角标的整宽推广单卡（.floor-single-card:has(.badge)）
   hideHotSearch: boolean;
   apiFilters: boolean;
   hideCharging: boolean;
@@ -130,6 +131,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   allow: { keywords: [], upNames: [], uids: [] },
   hideAd: false,
   hideLiveCard: false, // 屏蔽信息流里的直播推荐卡（首页/动态里链向 live.bilibili.com 的卡）
+  hideFloorBadgeCard: false, // 屏蔽首页带角标的整宽推广单卡（.floor-single-card:has(.badge)）；样式整体隐藏，见 stylehide.ts
   hideHotSearch: false,
   apiFilters: false, // 精确过滤总开关（关闭时完全不联网）
   hideCharging: false, // 充电专属视频（API）
